@@ -24,10 +24,30 @@ struct Index {
   @State currentIndex: number = 0
   @State isDarkMode: boolean = false
   @State languages: Language[] = LANGUAGES
+  @State filteredLanguages: Language[] = LANGUAGES
+  @State selectedDifficulty: string = '全部'
+  @State searchKey: string = ''
   @State queryInput: string = ''
   @State queryResult: string = ''
   @State isQuerying: boolean = false
   private aiService: AIService = AIService.getInstance()
+
+  // 搜索和筛选方法
+  filterLanguages() {
+    this.filteredLanguages = this.languages.filter(lang => {
+      const matchSearch = this.searchKey === '' || 
+        lang.name.toLowerCase().includes(this.searchKey.toLowerCase()) ||
+        lang.description.toLowerCase().includes(this.searchKey.toLowerCase()) ||
+        lang.features.some(f => f.toLowerCase().includes(this.searchKey.toLowerCase()))
+      
+      const matchDifficulty = this.selectedDifficulty === '全部' ||
+        (this.selectedDifficulty === '入门' && lang.difficulty === 'easy') ||
+        (this.selectedDifficulty === '进阶' && lang.difficulty === 'medium') ||
+        (this.selectedDifficulty === '高级' && lang.difficulty === 'hard')
+      
+      return matchSearch && matchDifficulty
+    })
+  }
 
   build() {
     Column() {
@@ -295,34 +315,41 @@ struct Index {
         .margin({ bottom: 24 })
 
       // 搜索栏
-      TextInput({ placeholder: '搜索编程语言...' })
+      TextInput({ placeholder: '搜索编程语言...', text: this.searchKey })
         .width('100%')
         .height(40)
         .margin({ bottom: 16 })
         .onChange((value: string) => {
-          // TODO: 实现搜索功能
+          this.searchKey = value
+          this.filterLanguages()
         })
 
       // 难度过滤按钮组
       Row() {
-        Button('全部')
+        ForEach(['全部', '入门', '进阶', '高级'], (difficulty: string) => {
+          Button({ type: this.selectedDifficulty === difficulty ? ButtonType.Normal : ButtonType.Capsule, stateEffect: true }) {
+            Text(difficulty)
+              .fontSize(14)
+              .fontColor(this.selectedDifficulty === difficulty ? Color.White : '#666666')
+          }
           .margin({ right: 8 })
-        Button('入门')
-          .margin({ right: 8 })
-        Button('进阶')
-          .margin({ right: 8 })
-        Button('高级')
+          .backgroundColor(this.selectedDifficulty === difficulty ? '#2196F3' : '#F5F5F5')
+          .onClick(() => {
+            this.selectedDifficulty = difficulty
+            this.filterLanguages()
+          })
+        })
       }
       .width('100%')
       .margin({ bottom: 16 })
 
       // 语言列表
       List() {
-        ForEach(this.languages, (language: Language) => {
+        ForEach(this.filteredLanguages, (language: Language) => {
           ListItem() {
             this.LanguageCard(language)
           }
-        })
+        }, language => language.id.toString())
       }
       .width('100%')
       .layoutWeight(1)

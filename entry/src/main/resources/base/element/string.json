@@ -1,0 +1,20 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "AI编程学习助手模块"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "AI编程学习助手"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "AI编程学习助手"
+    },
+    {
+      "name": "permission_internet_reason",
+      "value": "需要访问网络以获取AI服务响应"
+    }
+  ]
+}

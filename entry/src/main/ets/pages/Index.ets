@@ -1,5 +1,8 @@
 import { Language, LANGUAGES } from '../model/LanguageModel'
 import { AIService } from '../services/AIService'
+import { PathStage, PathTopic, LearningPathService } from '../model/LearningPathModel'
+import { LearningPathStage } from '../components/LearningPathStage'
+import { LearningPathViewModel } from '../viewmodel/LearningPathViewModel'
 
 // 定义颜色常量
 const DIFFICULTY_COLORS = {
@@ -32,7 +35,11 @@ struct Index {
   @State isQuerying: boolean = false
   @State quickStartPressed: boolean = false
   @State continueStudyPressed: boolean = false
+  @State currentLanguage: string = 'Python'
+  @State stages: PathStage[] = LearningPathService.getInstance().getLearningPath('Python')
+  @State selectedLanguageIndex: number = 0
   private aiService: AIService = AIService.getInstance()
+  private learningPathVM: LearningPathViewModel = new LearningPathViewModel()
 
   // 搜索和筛选方法
   filterLanguages() {
@@ -409,11 +416,69 @@ struct Index {
   @Builder
   LearningPathContent() {
     Column() {
+      // 顶部标题
       Text('学习路径')
         .fontSize(28)
         .fontWeight(FontWeight.Bold)
-      // 待实现：学习路径内容
+        .margin({ bottom: 24 })
+
+      // 选择语言下拉框
+      Row() {
+        Text('选择编程语言：')
+          .fontSize(16)
+          .margin({ right: 8 })
+        
+        Select(this.learningPathVM.getSupportedLanguages().map(lang => ({
+          value: lang,
+          text: lang
+        })))
+          .selected(this.learningPathVM.selectedLanguageIndex)
+          .value(this.learningPathVM.currentLanguage)
+          .width(200)
+          .onSelect((index: number) => {
+            this.learningPathVM.updateLanguage(index)
+          })
+      }
+      .margin({ bottom: 24 })
+
+      // 学习进度
+      Row() {
+        Progress({
+          value: this.learningPathVM.getProgressValue(),
+          total: 100,
+          type: ProgressType.Ring
+        })
+          .width(60)
+          .height(60)
+          .margin({ right: 16 })
+
+        Column() {
+          Text('学习进度')
+            .fontSize(16)
+            .fontWeight(FontWeight.Medium)
+          Text(`${this.learningPathVM.getProgressValue()}% 完成`)
+            .fontSize(14)
+            .fontColor($r('app.color.secondary_text'))
+            .margin({ top: 4 })
+        }
+        .alignItems(HorizontalAlign.Start)
+      }
+      .margin({ bottom: 24 })
+
+      // 学习路径列表
+      List() {
+        ForEach(this.learningPathVM.stages, (stage) => {
+          ListItem() {
+            LearningPathStage({ stageVM: stage })
+          }
+        })
+      }
+      .width('100%')
+      .layoutWeight(1)
     }
+    .width('100%')
+    .height('100%')
+    .padding(16)
   }
 
   @Builder

@@ -30,6 +30,8 @@ struct Index {
   @State queryInput: string = ''
   @State queryResult: string = ''
   @State isQuerying: boolean = false
+  @State quickStartPressed: boolean = false
+  @State continueStudyPressed: boolean = false
   private aiService: AIService = AIService.getInstance()
 
   // 搜索和筛选方法
@@ -205,6 +207,25 @@ struct Index {
           .backgroundColor($r('app.color.card_background'))
           .borderRadius(8)
           .margin({ right: 16 })
+          .onClick(() => {
+            this.currentIndex = 1  // 切换到编程语言页面
+          })
+          .opacity(this.quickStartPressed ? 0.7 : 1)
+          .scale({
+            x: this.quickStartPressed ? 0.98 : 1,
+            y: this.quickStartPressed ? 0.98 : 1
+          })
+          .animation({
+            duration: 250,
+            curve: Curve.EaseInOut
+          })
+          .onTouch((event: TouchEvent) => {
+            if (event.type === TouchType.Down) {
+              this.quickStartPressed = true
+            } else if (event.type === TouchType.Up) {
+              this.quickStartPressed = false
+            }
+          })
 
           Column() {
             Text('继续学习')
@@ -218,7 +239,33 @@ struct Index {
           .padding(16)
           .backgroundColor($r('app.color.card_background'))
           .borderRadius(8)
+          .onClick(() => {
+            // 获取最近学习的语言ID
+            const pythonLanguage = this.languages.find(lang => lang.name === 'Python')
+            if (pythonLanguage) {
+              // TODO: 跳转到Python详情页
+              this.currentIndex = 1  // 暂时先切换到编程语言页面
+            }
+          })
+          .opacity(this.continueStudyPressed ? 0.7 : 1)
+          .scale({
+            x: this.continueStudyPressed ? 0.98 : 1,
+            y: this.continueStudyPressed ? 0.98 : 1
+          })
+          .animation({
+            duration: 250,
+            curve: Curve.EaseInOut
+          })
+          .onTouch((event: TouchEvent) => {
+            if (event.type === TouchType.Down) {
+              this.continueStudyPressed = true
+            } else if (event.type === TouchType.Up) {
+              this.continueStudyPressed = false
+            }
+          })
         }
+        .width('100%')
+        .justifyContent(FlexAlign.Start)
       }
       .width('100%')
       .padding(16)
